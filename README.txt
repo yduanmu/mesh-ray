@@ -10,11 +10,11 @@ stl2ascii your_binary_stl_file.stl new_ascii_stl_file.stl
 stl your_ascii_stl_file.stl new_binary_stl_file.stl
 
 
-New algorithm:
+Algorithm:
 1. Set up half-edge data structure (start, end, next, twin). Assumes manifold.
 
 2. Check for the nearest vertex (point) to the origin of the ray. I used the
-    k-d tree search.
+    k-d tree search and used squared distances to avoid calculating square roots.
     a. If the origin is equidistant between 2 and only 2 points, then it's at
         an edge. Only ray DIRECTION matters. Use the ray direction rather than
         the origin when doing half-edge traversing and guessing.
@@ -29,14 +29,13 @@ New algorithm:
         multiple calculations per an arbitrarily large amount of planes (need to 
         find both plane equation and distance between point and plane) would be 
         terribly inefficient. I assumed that this would be inefficient enough that,
-        even if there would be more vertices to NNS than point-plane distances to 
-        compare, an NNS of the vertices would still be more optimal. Was this a
-        correct assumption?
+        even if there would be more vertices to compare than point-plane distances, 
+        a NNS of the vertices would still be more optimal.
 
-5. Find the parametric equation of a line using two points (ray origin and 
-    ray direction).
+5. Find the parametric equation of the line containing the ray using two points 
+    (ray origin and ray direction).
 
-6. Calculate the point of intersection of that plane and the line using the 
+6. Calculate the point of intersection of the nearest plane and that line using the 
     plane equation and parametric equation of the line.
 
 7. Check whether the intersection is within a triangle face.

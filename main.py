@@ -1,6 +1,26 @@
 import numpy as np
 from stl import mesh as m
 
+class K3DTree_Node: #K3D: 3-d tree (k-d tree)
+    def __init__(self):
+        self.left = None
+        self.right = None
+        self.dim = None
+        self.val = None
+
+class K3DTree:
+    def __init__(self):
+        self.root = None
+
+#given a list of points, randomly selects the median out of 9 points (sort these 9 by given dimension)
+#if <=9 but >2 points, selects the median out of all of them
+#if 2 points, select the first point
+#if 1 point, just select it.
+def choose_median(point_list, dim):
+
+def make_K3DTree(point_list, depth):
+    axis = depth % 3 # 0=x, 1=y, 2=z
+
 class Halfedge:
     def __init__(self, start, end, next=None, twin=None):
         self.start = start #starting vertex
