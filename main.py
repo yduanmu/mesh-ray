@@ -1,5 +1,6 @@
 import numpy as np
 from stl import mesh as m
+from numpy import random
 
 class K3DTree_Node: #K3D: 3-d tree (k-d tree)
     def __init__(self):
@@ -17,6 +18,21 @@ class K3DTree:
 #if 2 points, select the first point
 #if 1 point, just select it.
 def choose_median(point_list, dim):
+    #select 9 or less points
+    selected_list = np.array
+    if len(point_list) >= 9:
+        for i in range(8):
+            j = random.randint(len(point_list)-1)
+            selected_list[i] = point_list[j]
+            point_list.pop(j)       
+    elif len(point_list) == 2|1:
+        return point_list[0]
+    else:
+        selected_list = np.array(point_list)
+
+    #calculate median based on dim
+    sorted_list = selected_list[selected_list[:, dim].argsort()] #dim 0=x, 1=y, 2=z
+    return sorted_list[len(sorted_list)//2]
 
 def make_K3DTree(point_list, depth):
     axis = depth % 3 # 0=x, 1=y, 2=z
@@ -33,8 +49,7 @@ def vertex_key(v1, v2):
     v_arr = np.round(np.array([v1, v2]), decimals=5)
     return str(v_arr[0])+str(v_arr[1])
 
-def parse_halfedges(file):
-    mesh = m.Mesh.from_file('./mesh/'+file)
+def parse_halfedges(mesh):
     vertices = mesh.vectors #vertex class from numpy_stl: x, y, z
     halfedge_dict = {}
 
@@ -66,7 +81,10 @@ def main():
         file = str(input("File: "))
         if file == "quit":
             break
-        parse_halfedges(file)
+        mesh = m.Mesh.from_file('./mesh/'+file)
+        point_list = np.unique(mesh.vectors.reshape(-1, 3), axis=0) #list of unique points in the mesh
+        parse_halfedges(mesh)
+        kdtree = make_K3DTree(point_list, 0)
 
         r_orig = str(input("x y z coordinates of ray origin: ")).split(" ")
         r_dir = str(input("x y z coordinates of ray direction: ")).split(" ")
