@@ -50,7 +50,6 @@ Limitations:
 - The triangular mesh must be manifold.
 
 
-
 Hi Melissa,
 
 This is great, and your explanation is great.  Now to make this program more general, 
