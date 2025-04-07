@@ -4,8 +4,8 @@ from numpy import random
 
 class K3DTree_Node: #K3D: 3-d tree (k-d tree)
     def __init__(self):
-        self.left = None
-        self.right = None
+        self.left_child = None
+        self.right_child = None
         self.dim = None
         self.val = None
 
@@ -49,8 +49,18 @@ def choose_median(point_list, dim):
             median_index = point_index[i]
     return median_index
 
-def make_K3DTree(point_list, depth):
+def make_K3DTree(point_list, node, depth):\
+    #choose the axis of this level and set current node value
     axis = depth % 3 #axis 0=x, 1=y, 2=z
+    median = choose_median(point_list, axis)
+    node.val = median
+    node.dim = axis
+
+    #left and right children
+    before_list = [] #points before median
+    after_list = [] #points after median
+    node.left_child = make_K3DTree(before_list, K3DTree_Node(), depth+1)
+    node.right_child = make_K3DTree(after_list, K3DTree_Node(), depth+1)
 
 class Halfedge:
     def __init__(self, start, end, next=None, twin=None):
