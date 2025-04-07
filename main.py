@@ -14,10 +14,10 @@ class K3DTree:
         self.root = None
 
 #given a list of points, randomly selects the median out of 9 points (sort these 9 by given dimension)
+#returns the index of the median point
 #if <=9 but >2 points, selects the median out of all of them
 #if 2 points, select the first point
 #if 1 point, just select it.
-#returns the index of the median point
 def choose_median(point_list, dim):
     #select 9 or less points
     selected_list = []
