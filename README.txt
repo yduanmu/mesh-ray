@@ -14,7 +14,7 @@ Algorithm:
 1. Set up half-edge data structure (start, end, next, twin). Assumes manifold.
 
 2. Check for the nearest vertex (point) to the origin of the ray. I used the
-    k-d tree search and used squared distances to avoid calculating square roots.
+    k-d tree search.
     a. If the origin is equidistant between 2 and only 2 points, then it's at
         an edge. Only ray DIRECTION matters. Use the ray direction rather than
         the origin when doing half-edge traversing and guessing.
