@@ -1,3 +1,9 @@
+'''
+The main issue with this k-d tree is that it partitions incorrectly. It
+partitions at the median's index in the previous dimension when it should
+be partitioning at the median's index in the current dimension (lines 72-79).
+'''
+
 class K3DTree_Node: #K3D: 3-d tree (k-d tree)
     def __init__(self):
         self.left_child = None
