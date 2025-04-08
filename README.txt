@@ -10,11 +10,18 @@ stl2ascii your_binary_stl_file.stl new_ascii_stl_file.stl
 stl your_ascii_stl_file.stl new_binary_stl_file.stl
 
 
+Initially, I tried to construct a k-d tree in order to conduct a nearest
+neighbour search. This took quite a while. Halfway through the process, it 
+occurred to me that this method was actually less efficient, since for this 
+particular problem, I would only be querying for NNS *once*. This is why my 
+algorithm uses linear search to find the nearest neighbour.
+
+
 Algorithm:
 1. Set up half-edge data structure (start, end, next, twin). Assumes manifold.
 
-2. Check for the nearest vertex (point) to the origin of the ray. I used the
-    k-d tree search.
+2. Check for the nearest vertex (point) to the origin of the ray using linear
+    search. Use squared distances to avoid calculating square roots.
     a. If the origin is equidistant between 2 and only 2 points, then it's at
         an edge. Only ray DIRECTION matters. Use the ray direction rather than
         the origin when doing half-edge traversing and guessing.
