@@ -10,51 +10,57 @@ stl2ascii your_binary_stl_file.stl new_ascii_stl_file.stl
 stl your_ascii_stl_file.stl new_binary_stl_file.stl
 
 
-Initially, I tried to construct a k-d tree in order to conduct a nearest
-neighbour search. This took quite a while. Halfway through the process, it 
-occurred to me that this method was actually less efficient, since for this 
-particular problem, I would only be querying for NNS *once*. This is why my 
-algorithm uses linear search to find the nearest neighbour.
+Mesh-ray algorithm:
+1. Set up BVH.
+    a. Boxes are minimum and axis-aligned, but not necessarily cubes.
+    b. Triangles belong to whichever boxes their centroids do.
+    c. The maximum number of triangles per bounding box is arbitrarily defined
+        as the ceiling of the cube root of the total triangles in the mesh.
+2. Supplied origin and direction, store the equation of a ray.
+3. Test the ray against smaller and smaller bounding boxes using the cube-ray 
+    algorithm from before (although unlike previous algorithm, a hit through edge 
+    or vertex is still counted as a face hit).
+    a. If we're more than one level deep, don't need to check if the cube 
+        intersection is on the ray.
+    b. If no hit in cube at any point, return.
+4. Once the smallest box is also confirmed a hit, test against all triangle faces
+    inside that box using plane equation and parametric equation of the line 
+    containing the ray.
+    a. Intersection guaranteed to be on plane, but now check if it's on triangle 
+        face.
+    b. If the algorithm has gotten this far, then the intersection is definitely 
+        on the ray. Don't need to check.
+5. Return the point of intersection and the index of the triangle.
 
 
-Algorithm:
-1. Set up half-edge data structure (start, end, next, twin). Assumes manifold.
+Cube-ray algorithm:
+1. Check for nearest 4 vertices to origin of the ray.
+    a. If the origin is equidistant between 4 vertices or exactly at a vertex, check 
+        for the nearest 4 vertices to the direction of the ray. This is because, in 
+        these two cases, the ray is only guaranteed to intersect with a face of the 
+        cube once.
+2. If those 4 points describe a valid face of the cube, then it finds the plane 
+    equation for the plane containing that face.
+3. Calculate the point of intersection of the line containing the ray by using the
+    equation for the plane and parametric equation of the line.
+4. Intersection guaranteed to be on plane, but now check if it's on cube face.
+5. Intersection guaranteed to be on line, but now check if it's on the ray.
+6. Return TRUE/FALSE depending on whether there is intersection or not.
 
-2. Check for the nearest vertex (point) to the origin of the ray using linear
-    search. Use squared distances to avoid calculating square roots.
-    a. If the origin is equidistant between 2 and only 2 points, then it's at
-        an edge. Only ray DIRECTION matters. Use the ray direction rather than
-        the origin when doing half-edge traversing and guessing.
-    b. If the origin is equidistant between 3 points, then we know for sure
-        the closest plane. Skip all half-edge traversing and guessing.
 
-3. Traverse the triangle fan of that vertex and find the plane equations for each.
+Time complexity analysis:
+- Gotta sort three times per bounding box created.
 
-4. Find the distance between each traversed plane and the origin of the ray. only
-    remember the plane with the shortest distance.
-    a. Here, I attempted to optimize the algorithm. I imagined that making
-        multiple calculations per an arbitrarily large amount of planes (need to 
-        find both plane equation and distance between point and plane) would be 
-        terribly inefficient. I assumed that this would be inefficient enough that,
-        even if there would be more vertices to compare than point-plane distances, 
-        a NNS of the vertices would still be more optimal.
 
-5. Find the parametric equation of the line containing the ray using two points 
-    (ray origin and ray direction).
-
-6. Calculate the point of intersection of the nearest plane and that line using the 
-    plane equation and parametric equation of the line.
-
-7. Check whether the intersection is within a triangle face.
-
-8. Check whether the intersection is on the ray using the dot product of the 
-    vectors origin->intersection and origin->direction
-
-9. If valid, return the point of intersection and index of the face that contains it.
+Notes:
+- Check whether intersection is on a ray using dot product of the vectors 
+    origin->intersection and origin->direction
+- Checking intersection of line against plane is the same reused code between the cubes
+    and the triangles, but cube only cares whether there is intersection or not.
 
 
 Limitations:
-- The triangular mesh must be manifold.
+- 
 
 
 Hi Melissa,
