@@ -13,23 +13,20 @@ stl your_ascii_stl_file.stl new_binary_stl_file.stl
 Mesh-ray algorithm:
 1. Set up BVH.
     a. Boxes are minimum and axis-aligned, but not necessarily cubes.
-    b. Triangles belong to whichever boxes their centroids do.
+    b. Pick longest axis of current box and split at midpoint. Triangles belong 
+        to whichever boxes their centroids do.
     c. The maximum number of triangles per bounding box is arbitrarily defined
         as the ceiling of the cube root of the total triangles in the mesh.
-2. Supplied origin and direction, store the equation of a ray.
-3. Test the ray against smaller and smaller bounding boxes using the cube-ray 
+2. Supplied origin and direction, store the parametric equation of the line 
+    containing the ray.
+3. Test the line against smaller and smaller bounding boxes using the cube-ray 
     algorithm from before (although unlike previous algorithm, a hit through edge 
     or vertex is still counted as a face hit).
     a. If we're more than one level deep, don't need to check if the cube 
         intersection is on the ray.
     b. If no hit in cube at any point, return.
 4. Once the smallest box is also confirmed a hit, test against all triangle faces
-    inside that box using plane equation and parametric equation of the line 
-    containing the ray.
-    a. Intersection guaranteed to be on plane, but now check if it's on triangle 
-        face.
-    b. If the algorithm has gotten this far, then the intersection is definitely 
-        on the ray. Don't need to check.
+    inside that box using the Möller–Trumbore ray-triangle intersection algorithm.
 5. Return the point of intersection and the index of the triangle.
 
 
@@ -49,7 +46,11 @@ Cube-ray algorithm:
 
 
 Time complexity analysis:
-- Gotta sort three times per bounding box created.
+- getting all triangles:
+    - max and min per triangle: O(N log N) where N = 3 (three vertices per triangle)
+    - finding centroids: O(N), where N = number of triangles per mesh
+        - O(N) to make list, O(N) to convert to numpy array
+- Make box: O(N)
 
 
 Notes:
