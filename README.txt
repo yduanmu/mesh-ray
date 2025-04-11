@@ -15,8 +15,7 @@ Mesh-ray algorithm:
     a. Boxes are minimum and axis-aligned, but not necessarily cubes.
     b. Pick longest axis of current box and split at midpoint. Triangles belong 
         to whichever boxes their centroids do.
-    c. The maximum number of triangles per bounding box is arbitrarily defined
-        as the ceiling of the cube root of the total triangles in the mesh.
+    c. The maximum depth is defined by the user, to a max of floor log2(triangles).
 2. Supplied origin and direction, store the parametric equation of the line 
     containing the ray.
 3. Test the line against smaller and smaller bounding boxes using the cube-ray 
@@ -47,10 +46,11 @@ Cube-ray algorithm:
 
 Time complexity analysis:
 - getting all triangles:
-    - max and min per triangle: O(N log N) where N = 3 (three vertices per triangle)
+    - max and min per triangle: O(N log N)
     - finding centroids: O(N), where N = number of triangles per mesh
         - O(N) to make list, O(N) to convert to numpy array
-- Make box: O(N)
+- Make box
+    - 
 
 
 Notes:
