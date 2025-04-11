@@ -15,7 +15,7 @@ Mesh-ray algorithm:
     a. Boxes are minimum and axis-aligned, but not necessarily cubes.
     b. Pick longest axis of current box and split at midpoint. Triangles belong 
         to whichever boxes their centroids do.
-    c. The maximum depth is defined by the user, to a max of floor log2(triangles).
+    c. The depth is defined by the user, to a maximum of floor log2(triangles).
 2. Supplied origin and direction, store the parametric equation of the line 
     containing the ray.
 3. Test the line against smaller and smaller bounding boxes using the cube-ray 

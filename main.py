@@ -33,11 +33,13 @@ def make_box(triangle_arr, depth): #depth counts down
         return None
     
     bounding_box = Bounding_Box()
+    
     box_min = triangle_arr[0].minp
     box_max = triangle_arr[0].maxp
 
     for tri in triangle_arr[1:]:
         box_min, box_max = merge_boxes(box_min, box_max, tri.minp, tri.maxp)
+    
     bounding_box.minp = box_min
     bounding_box.maxp = box_max
 
