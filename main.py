@@ -60,10 +60,6 @@ def make_box(triangle_arr, depth): #depth counts down
 
 
 def main():
-    # tri = Triangle(1, [0, 0, 0], [1, 2, 0], [2, 1, 0])
-    # print(tri.max)
-    # print(tri.min)
-    print("\n------------------------------------------------------------------")
     file = str(input("File: "))
     mesh = m.Mesh.from_file('./mesh/'+file)
     # point_list = np.unique(mesh.vectors.reshape(-1, 3), axis=0) #list of unique points in the mesh
@@ -85,6 +81,8 @@ def main():
     
     BVH = make_box(triangle_list, depth)
 
+
+    #arbitrary ray REPL
     while True:
         r_orig_str = str(input("x y z coordinates of ray origin: "))
         if r_orig_str == "quit":
@@ -97,7 +95,4 @@ def main():
             r_dir = [float(i) for i in r_dir_str]
             print("")
 
-            
-    
-    print("------------------------------------------------------------------")
 main()
