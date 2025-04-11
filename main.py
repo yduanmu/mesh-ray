@@ -60,6 +60,24 @@ def make_box(triangle_arr, depth): #depth counts down
         bounding_box.right_child = make_box(right_arr, depth-1)
         return bounding_box
 
+#slab method for AABB hit
+def slab(r_orig, r_dir, b_min, b_max):
+    epsilon = 1e-8
+    safe_dir = np.where(np.abs(r_dir) < epsilon, epsilon, r_dir) #avoid div by 0
+    inv_dir = 1.0 / safe_dir
+
+    t_low = (b_min - r_orig) * inv_dir
+    t_high = (b_max - r_orig) * inv_dir
+
+    t_close = np.minimum(t_low, t_high)
+    t_far = np.maximum(t_low, t_high)
+
+    t_enter = np.max(t_close)
+    t_exit = np.min(t_far)
+
+    if t_enter > t_exit or t_exit < 0:
+        return False
+    return True
 
 def main():
     file = str(input("File: "))

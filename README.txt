@@ -18,32 +18,13 @@ Mesh-ray algorithm:
     c. The depth is defined by the user, to a maximum of floor log2(triangles).
 2. Supplied origin and direction, store the parametric equation of the line 
     containing the ray.
-3. Test the line against smaller and smaller bounding boxes using the cube-ray 
-    algorithm from before (see below).
-    a. If no hit in cube at any point, return.
+3. Test the line against smaller and smaller bounding boxes with the slab method.
+    a. If any box has no hits at all, RETURN FALSE.
 4. Once the smallest box is also confirmed a hit, test against all triangle faces
     inside that box using the Möller–Trumbore ray-triangle intersection algorithm.
-    a. Check if ray is parallel to plane. (O: return FALSE, X: continue)
-    b. Use equation of plane and parametric equation of line to calculate 
-        intersection.
-    c. Check if within triangle.
-    d. Check if on ray.
+    a. Check if ray is parallel to plane. (O: RETURN FALSE, X: continue)
+    b. Check if the ray-plane intersection lies outside the triangle (M-T alg)
 5. Return the point of intersection and the index of the triangle.
-
-
-Cube-ray algorithm:
-1. Check for nearest 4 vertices to origin of the ray.
-    a. If the origin is equidistant between 4 vertices or exactly at a vertex, check 
-        for the nearest 4 vertices to the direction of the ray. This is because, in 
-        these two cases, the ray is only guaranteed to intersect with a face of the 
-        cube once.
-2. If those 4 points describe a valid face of the cube, then it finds the plane 
-    equation for the plane containing that face.
-3. Möller–Trumbore ray-triangle intersection algorithm
-    a. Check if ray is parallel to plane. (O: return FALSE, X: continue)
-    b. Check if within the cube face.
-    c. Check if on ray.
-6. Return TRUE/FALSE depending on whether there is intersection or not.
 
 
 Time complexity analysis:
