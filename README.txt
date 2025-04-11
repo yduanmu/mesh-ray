@@ -50,7 +50,7 @@ Time complexity analysis:
     - finding centroids: O(N), where N = number of triangles per mesh
         - O(N) to make list, O(N) to convert to numpy array
 - Make box
-    - 
+    - incredibly slow. O(N^x)
 
 
 Notes:
