@@ -19,13 +19,15 @@ Mesh-ray algorithm:
 2. Supplied origin and direction, store the parametric equation of the line 
     containing the ray.
 3. Test the line against smaller and smaller bounding boxes using the cube-ray 
-    algorithm from before (although unlike previous algorithm, a hit through edge 
-    or vertex is still counted as a face hit).
-    a. If we're more than one level deep, don't need to check if the cube 
-        intersection is on the ray.
-    b. If no hit in cube at any point, return.
+    algorithm from before (see below).
+    a. If no hit in cube at any point, return.
 4. Once the smallest box is also confirmed a hit, test against all triangle faces
     inside that box using the Möller–Trumbore ray-triangle intersection algorithm.
+    a. Check if ray is parallel to plane. (O: return FALSE, X: continue)
+    b. Use equation of plane and parametric equation of line to calculate 
+        intersection.
+    c. Check if within triangle.
+    d. Check if on ray.
 5. Return the point of intersection and the index of the triangle.
 
 
@@ -37,10 +39,10 @@ Cube-ray algorithm:
         cube once.
 2. If those 4 points describe a valid face of the cube, then it finds the plane 
     equation for the plane containing that face.
-3. Calculate the point of intersection of the line containing the ray by using the
-    equation for the plane and parametric equation of the line.
-4. Intersection guaranteed to be on plane, but now check if it's on cube face.
-5. Intersection guaranteed to be on line, but now check if it's on the ray.
+3. Möller–Trumbore ray-triangle intersection algorithm
+    a. Check if ray is parallel to plane. (O: return FALSE, X: continue)
+    b. Check if within the cube face.
+    c. Check if on ray.
 6. Return TRUE/FALSE depending on whether there is intersection or not.
 
 
@@ -49,8 +51,8 @@ Time complexity analysis:
     - max and min per triangle: O(N log N)
     - finding centroids: O(N), where N = number of triangles per mesh
         - O(N) to make list, O(N) to convert to numpy array
-- Make box
-    - incredibly slow. O(N^x)
+- make_box:
+    - O(N), but then recursively
 
 
 Notes:
