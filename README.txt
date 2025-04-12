@@ -16,14 +16,14 @@ Mesh-ray algorithm:
     b. Pick longest axis of current box and split at midpoint. Triangles belong 
         to whichever boxes their centroids do.
     c. The depth is defined by the user, to a maximum of floor log2(triangles).
-2. Supplied origin and direction, store the parametric equation of the line 
-    containing the ray.
-3. Test the line against smaller and smaller bounding boxes with the slab method.
-    a. If any box has no hits at all, RETURN FALSE.
+2. Test the ray against smaller and smaller bounding boxes with the slab method.
+    a. If any box has no hits at all, RETURN NO HIT.
 4. Once the smallest box is also confirmed a hit, test against all triangle faces
-    inside that box using the Möller–Trumbore ray-triangle intersection algorithm.
-    a. Check if ray is parallel to plane. (O: RETURN FALSE, X: continue)
-    b. Check if the ray-plane intersection lies outside the triangle (M-T alg)
+    inside that box.
+    a. Check if ray is parallel to plane. (O: no hit, X: continue)
+    b. Find intersection
+    b. Check if intersection lies outside the triangle (O: no hit, X: continue)
+    c. Check if intersection lies outside ray (O: no hit, X: continue)
 5. Return the point of intersection and the index of the triangle.
 
 

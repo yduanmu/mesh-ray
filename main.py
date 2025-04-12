@@ -79,6 +79,66 @@ def slab(r_orig, r_dir, b_min, b_max):
         return False
     return True
 
+#given a triangle, returns the plane equation in an numpy array [A, B, C, D] meaning Ax + By + Cz + D = 0
+def find_planeq(tri):
+    P = tri.v1
+    Q = tri.v2
+    R = tri.v3
+    
+    #a, b: vectors between P->Q and P->R respectively
+    a = np.array(Q) - np.array(P)
+    b = np.array(R) - np.array(P)
+    
+    #cross product a x b in order to find the normal vector
+    n = np.cross(a, b)
+    
+    #find the "equals"
+    d = -np.dot(n, P)
+
+    return np.append(n, d)
+
+#does the ray hit the triangle, and if so, where?
+def tri_hit(r_orig, r_dir, tri):
+    #check if ray is parallel to plane
+    plane_normal = find_planeq(tri)[:3]
+    epsilon = 1e-8
+    if(np.absolute(np.dot(plane_normal, r_dir)) < epsilon):
+        return False
+    
+    #find intersection
+
+
+    return [True, coords]
+
+#given a list of candidates (array with [triangle, coords]), finds the nearest hit to ray origin
+def closest_hit(r_orig, r_dir, tri_candidates):
+    return [tri, coords]
+
+#starting from the root of BVH, return list of triangles hit contained within the smallest box
+#if no hit at any point, return FALSE
+def box_search(r_orig, r_dir, node):
+    if node is None:
+        return False
+    
+    #no hit, no life
+    if not slab(r_orig, r_dir, node.minp, node.maxp):
+        return False
+    
+    #leaf
+    if node.left_child is None and node.right_child is None:
+        tri_candidates = []
+        for tri in node.contained_triangles:
+            tri_hit = tri_hit(r_orig, r_dir, tri)
+            if tri_hit[0]:
+                tri_candidates.append([tri, tri_hit[1]])
+        
+        #find and return nearest hit to ray origin
+        return closest_hit(r_orig, r_dir, tri_candidates)
+
+    #recursively check children
+    box_search(r_orig, r_dir, node.left_child)
+    box_search(r_orig, r_dir, node.right_child)
+
 def main():
     file = str(input("File: "))
     mesh = m.Mesh.from_file('./mesh/'+file)
@@ -92,15 +152,18 @@ def main():
         tricount += 1
     print("Triangle count: ", tricount)
 
-    #depth BVH
+    #depth for BVH
     max_depth = int(np.floor(np.log2(tricount)))
     print("Depth of BVH (max:", max_depth, "): ", end="")
     depth = int(input(""))
     if depth > max_depth:
         depth = max_depth
     
+    #create BVH
     BVH = make_box(triangle_list, depth)
 
+    #traverse BVH and use slab method for hits
+    box_search(r_orig, r_dir, BVH)
 
     #arbitrary ray REPL
     while True:
