@@ -22,8 +22,9 @@ Mesh-ray algorithm:
     inside that box.
     a. Check if ray is parallel to plane. (O: no hit, X: continue)
     b. Find intersection
-    b. Check if intersection lies outside the triangle (O: no hit, X: continue)
-    c. Check if intersection lies outside ray (O: no hit, X: continue)
+    b. Use barycentric coordinates to check if intersection lies within the 
+        triangle (O: continue, X: no hit)
+    c. Check if intersection lies inside ray (O: continue, X: no hit)
 5. Return the point of intersection and the index of the triangle.
 
 

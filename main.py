@@ -92,27 +92,57 @@ def find_planeq(tri):
     #cross product a x b in order to find the normal vector
     n = np.cross(a, b)
     
-    #find the "equals"
     d = -np.dot(n, P)
 
     return np.append(n, d)
 
 #does the ray hit the triangle, and if so, where?
 def tri_hit(r_orig, r_dir, tri):
+    planeq = find_planeq(tri)
+    no_hit = np.array([False, 0])
+
     #check if ray is parallel to plane
-    plane_normal = find_planeq(tri)[:3]
+    plane_normal = planeq[:3]
     epsilon = 1e-8
-    if(np.absolute(np.dot(plane_normal, r_dir)) < epsilon):
-        return False
+    if np.absolute(np.dot(plane_normal, r_dir)) < epsilon:
+        return no_hit
     
+
     #find intersection
+    line_const = r_orig
+    line_t = r_dir - r_orig
+    denominator = np.sum(plane_normal * line_t)
+
+    if np.absolute(denominator) < epsilon:
+        return no_hit
+    
+    t = (planeq[3] - np.dot(plane_normal, line_const)) / denominator
+    
+    intersection = line_const + (line_t * t)
 
 
-    return [True, coords]
+    #check if intersection is in triangle (corners and edges count)
+    tri_area = 0.5 * np.linalg.norm(np.cross(tri.v2 - tri.v1, tri.v3 - tri.v1))
+    alpha = (np.linalg.norm(np.cross(tri.v2 - intersection, tri.v3 - intersection))) / (2 * tri_area)
+    beta = (np.linalg.norm(np.cross(tri.v3 - intersection, tri.v1 - intersection))) / (2 * tri_area)
+    gamma = 1 - alpha - beta
+    minor_ep0 = 0 - epsilon
+    major_ep1 = 1 + epsilon
 
-#given a list of candidates (array with [triangle, coords]), finds the nearest hit to ray origin
+    if not(alpha >= minor_ep0 and alpha < major_ep1) or not(beta >= minor_ep0 and beta < major_ep1) or not(gamma >= minor_ep0 and gamma < major_ep1) or not(np.absolute((alpha + beta + gamma) - 1.0) > epsilon):
+        return no_hit
+    
+
+    #check if intersection is on ray
+    if np.dot(intersection - r_orig, r_dir - r_orig) < 0:
+        return no_hit
+    
+
+    return np.array([True, intersection])
+
+#given a list of candidates (array with [triangle, intersection]), finds the nearest hit to ray origin
 def closest_hit(r_orig, r_dir, tri_candidates):
-    return [tri, coords]
+    return np.array([tri, intersection])
 
 #starting from the root of BVH, return list of triangles hit contained within the smallest box
 #if no hit at any point, return FALSE
@@ -162,9 +192,6 @@ def main():
     #create BVH
     BVH = make_box(triangle_list, depth)
 
-    #traverse BVH and use slab method for hits
-    box_search(r_orig, r_dir, BVH)
-
     #arbitrary ray REPL
     while True:
         r_orig_str = str(input("x y z coordinates of ray origin: "))
@@ -173,9 +200,12 @@ def main():
         else:
             #get ray origin and direction
             r_orig_str = r_orig_str.split(" ")
-            r_orig = [float(i) for i in r_orig_str]
+            r_orig = np.array([float(i) for i in r_orig_str])
             r_dir_str = str(input("x y z coordinates of ray direction: ")).split(" ")
-            r_dir = [float(i) for i in r_dir_str]
+            r_dir = np.array([float(i) for i in r_dir_str])
             print("")
+
+            #traverse BVH and use slab method for hits
+            box_search(r_orig, r_dir, BVH)
 
 main()
