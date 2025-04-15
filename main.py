@@ -45,7 +45,7 @@ def make_box(triangle_arr, depth): #depth counts down
 
     if depth == 0 or len(triangle_arr) <= 1: #leaf
         bounding_box.contained_triangles = triangle_arr
-        print("min: ", bounding_box.minp, " max: ", bounding_box.maxp)
+        # print("min: ", bounding_box.minp, " max: ", bounding_box.maxp)
         return bounding_box
     else: #split triangle_arr based off centroids, lesser half into left child and greater half into right child
         median = [np.abs(bounding_box.maxp[0]) - np.abs(bounding_box.minp[0]),
@@ -122,6 +122,7 @@ def tri_hit(r_orig, r_dir, tri):
 
 
     #check if intersection is in triangle (corners and edges count)
+    #https://math.stackexchange.com/questions/4322/check-whether-a-point-is-within-a-3d-triangle
     tri_area = 0.5 * np.linalg.norm(np.cross(tri.v2 - tri.v1, tri.v3 - tri.v1))
     alpha = (np.linalg.norm(np.cross(tri.v2 - intersection, tri.v3 - intersection))) / (2 * tri_area)
     beta = (np.linalg.norm(np.cross(tri.v3 - intersection, tri.v1 - intersection))) / (2 * tri_area)
@@ -129,7 +130,7 @@ def tri_hit(r_orig, r_dir, tri):
     minor_ep0 = 0 - epsilon
     major_ep1 = 1 + epsilon
 
-    if not(alpha >= minor_ep0 and alpha < major_ep1) or not(beta >= minor_ep0 and beta < major_ep1) or not(gamma >= minor_ep0 and gamma < major_ep1) or not(np.absolute((alpha + beta + gamma) - 1.0) > epsilon):
+    if not ((alpha >= minor_ep0 and alpha < major_ep1) and (beta >= minor_ep0 and beta < major_ep1) and (gamma >= minor_ep0 and gamma < major_ep1) and (np.absolute((alpha + beta + gamma) - 1.0) <= epsilon)):
         return no_hit
     
 
@@ -140,9 +141,23 @@ def tri_hit(r_orig, r_dir, tri):
 
     return np.array([True, intersection])
 
+
+#given two points np.array([x, y, z]), return the distance between the two
+def calc_dist(p1, p2):
+    return np.absolute(np.sqrt(np.sum(np.power(p1-p2, 2))))
+
+
 #given a list of candidates (array with [triangle, intersection]), finds the nearest hit to ray origin
-def closest_hit(r_orig, r_dir, tri_candidates):
-    return np.array([tri, intersection])
+def closest_hit(r_orig, tri_candidates):
+    closest_dist = calc_dist(tri_candidates[0][1], r_orig)
+
+    for tri_can in tri_candidates[1:]:
+        dist = calc_dist(tri_can[1], r_orig)
+        if dist < closest_dist:
+            closest_dist = dist
+
+    return closest_dist
+
 
 #starting from the root of BVH, return list of triangles hit contained within the smallest box
 #if no hit at any point, return FALSE
@@ -158,16 +173,26 @@ def box_search(r_orig, r_dir, node):
     if node.left_child is None and node.right_child is None:
         tri_candidates = []
         for tri in node.contained_triangles:
-            tri_hit = tri_hit(r_orig, r_dir, tri)
-            if tri_hit[0]:
-                tri_candidates.append([tri, tri_hit[1]])
+            hit_result = tri_hit(r_orig, r_dir, tri)
+            if hit_result[0]:
+                tri_candidates.append([tri, hit_result[1]])
         
         #find and return nearest hit to ray origin
-        return closest_hit(r_orig, r_dir, tri_candidates)
+        return closest_hit(r_orig, tri_candidates)
 
     #recursively check children
-    box_search(r_orig, r_dir, node.left_child)
-    box_search(r_orig, r_dir, node.right_child)
+    left_result = box_search(r_orig, r_dir, node.left_child)
+    right_result = box_search(r_orig, r_dir, node.right_child)
+
+    if left_result and right_result:
+        return min(left_result, right_result)
+    elif left_result:
+        return left_result
+    elif right_result:
+        return right_result
+    else:
+        return False
+
 
 def main():
     file = str(input("File: "))
@@ -206,6 +231,7 @@ def main():
             print("")
 
             #traverse BVH and use slab method for hits
-            box_search(r_orig, r_dir, BVH)
+            traverse = box_search(r_orig, r_dir, BVH)
+            print(traverse)
 
 main()
