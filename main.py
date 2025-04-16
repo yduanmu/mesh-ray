@@ -94,6 +94,7 @@ def find_planeq(tri):
     
     d = -np.dot(n, P)
 
+    # print(f"Planeq for tri {tri.index}: {a}, {b}, {n}, {d}")
     return np.append(n, d)
 
 #does the ray hit the triangle, and if so, where?
@@ -252,7 +253,7 @@ def main():
             #traverse BVH and use slab method for hits
             traverse = box_search(r_orig, r_dir, BVH)
             if traverse:
-                print(f"Index: {traverse[0]}, Coordinates: {traverse[1]}")
+                print(f"Intersection at index: {traverse[0]}, coords: {traverse[1]}")
             else:
                 print("No valid intersection.")
 
