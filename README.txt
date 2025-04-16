@@ -21,7 +21,7 @@ Mesh-ray algorithm:
     b. Use barycentric coordinates to check if intersection lies within the 
         triangle (O: continue, X: no hit)
     c. Check if intersection lies inside ray (O: continue, X: no hit)
-5. Return the point of intersection and the index of the triangle.
+5. Return the closest point of intersection and the index of the triangle.
 
 
 Example output:
