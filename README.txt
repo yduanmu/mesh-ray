@@ -22,3 +22,13 @@ Mesh-ray algorithm:
         triangle (O: continue, X: no hit)
     c. Check if intersection lies inside ray (O: continue, X: no hit)
 5. Return the point of intersection and the index of the triangle.
+
+
+Example output:
+
+File: cat.stl
+Triangle count:  386
+Depth of BVH (max: 8 ): 5   
+x y z coordinates of ray origin: -1 -1 -1
+x y z coordinates of ray direction as a point: 100 100 100
+Intersection at index: 374, coords: [0. 0. 0.]
