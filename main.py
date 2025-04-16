@@ -99,7 +99,7 @@ def find_planeq(tri):
 #does the ray hit the triangle, and if so, where?
 def tri_hit(r_orig, r_dir, tri):
     planeq = find_planeq(tri)
-    no_hit = np.array([False, 0])
+    no_hit = [False, 0]
 
     #check if ray is parallel to plane
     plane_normal = planeq[:3]
@@ -110,7 +110,7 @@ def tri_hit(r_orig, r_dir, tri):
 
     #find intersection
     line_const = r_orig
-    line_t = r_dir - r_orig
+    line_t = r_dir
     denominator = np.sum(plane_normal * line_t)
 
     if np.absolute(denominator) < epsilon:
@@ -135,11 +135,11 @@ def tri_hit(r_orig, r_dir, tri):
     
 
     #check if intersection is on ray
-    if np.dot(intersection - r_orig, r_dir - r_orig) < 0:
+    if t < 0:
         return no_hit
     
-
-    return np.array([True, intersection])
+    # print(f"[DEBUG] t: {t}, Intersection: {intersection}, Origin: {r_orig}")
+    return [True, intersection]
 
 
 #given two points np.array([x, y, z]), return the distance between the two
@@ -149,14 +149,20 @@ def calc_dist(p1, p2):
 
 #given a list of candidates (array with [triangle, intersection]), finds the nearest hit to ray origin
 def closest_hit(r_orig, tri_candidates):
+    closest_tri = tri_candidates[0][0]
+    closest_coords = tri_candidates[0][1]
     closest_dist = calc_dist(tri_candidates[0][1], r_orig)
+    # print(tri_candidates[0][0].index, ": ", closest_dist)
 
     for tri_can in tri_candidates[1:]:
         dist = calc_dist(tri_can[1], r_orig)
         if dist < closest_dist:
             closest_dist = dist
+            closest_tri = tri_can[0]
+            closest_coords = tri_can[1]
+            # print(closest.index, ": ", closest_dist)
 
-    return closest_dist
+    return [closest_tri.index, closest_coords, closest_dist]
 
 
 #starting from the root of BVH, return list of triangles hit contained within the smallest box
@@ -172,24 +178,35 @@ def box_search(r_orig, r_dir, node):
     #leaf
     if node.left_child is None and node.right_child is None:
         tri_candidates = []
+        # print("contained tri #: ", len(node.contained_triangles))
         for tri in node.contained_triangles:
             hit_result = tri_hit(r_orig, r_dir, tri)
             if hit_result[0]:
                 tri_candidates.append([tri, hit_result[1]])
+            # else:
+            #     print("no hit")
         
         #find and return nearest hit to ray origin
-        return closest_hit(r_orig, tri_candidates)
+        if len(tri_candidates) > 0:
+            return closest_hit(r_orig, tri_candidates)
+        else:
+            return False
 
     #recursively check children
-    left_result = box_search(r_orig, r_dir, node.left_child)
-    right_result = box_search(r_orig, r_dir, node.right_child)
+    left = box_search(r_orig, r_dir, node.left_child)
+    right = box_search(r_orig, r_dir, node.right_child)
 
-    if left_result and right_result:
-        return min(left_result, right_result)
-    elif left_result:
-        return left_result
-    elif right_result:
-        return right_result
+    if left and right:
+        # print("left: ", left)
+        if(type(left)==list and type(right)==list):
+            if np.minimum(left[2], right[2]) == left[2]:
+                return left
+            else:
+                return right
+    elif left:
+        return left
+    elif right:
+        return right
     else:
         return False
 
@@ -204,6 +221,7 @@ def main():
     tricount = 0
     for i in range(len(mesh.vectors)):
         triangle_list.append(Triangle(i, mesh.vectors[i][0], mesh.vectors[i][1], mesh.vectors[i][2]))
+        # print(triangle_list[i].index)
         tricount += 1
     print("Triangle count: ", tricount)
 
@@ -211,7 +229,7 @@ def main():
     max_depth = int(np.floor(np.log2(tricount)))
     print("Depth of BVH (max:", max_depth, "): ", end="")
     depth = int(input(""))
-    if depth > max_depth:
+    if depth > max_depth or depth < 1:
         depth = max_depth
     
     #create BVH
@@ -220,18 +238,24 @@ def main():
     #arbitrary ray REPL
     while True:
         r_orig_str = str(input("x y z coordinates of ray origin: "))
-        if r_orig_str == "quit":
+        if r_orig_str == "stop":
             break
         else:
             #get ray origin and direction
             r_orig_str = r_orig_str.split(" ")
             r_orig = np.array([float(i) for i in r_orig_str])
-            r_dir_str = str(input("x y z coordinates of ray direction: ")).split(" ")
-            r_dir = np.array([float(i) for i in r_dir_str])
-            print("")
+            r_dir_str = str(input("x y z coordinates of ray direction as a point: ")).split(" ")
+            r_point = np.array([float(i) for i in r_dir_str])
+            r_dir = r_point - r_orig
+            r_dir = r_dir / np.linalg.norm(r_dir)
 
             #traverse BVH and use slab method for hits
             traverse = box_search(r_orig, r_dir, BVH)
-            print(traverse)
+            if traverse:
+                print(f"Index: {traverse[0]}, Coordinates: {traverse[1]}")
+            else:
+                print("No valid intersection.")
+
+            print("")
 
 main()
